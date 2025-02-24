@@ -2,6 +2,8 @@
 
 #include <sbus.h>
 
+int sbusPin = 0;
+
 /* SBUS object, reading SBUS */
 bfs::SbusRx sbus_rx(&Serial); // if Arduino is Uno: sbus_rx(&Serial)
 /* SBUS object, writing SBUS */
@@ -11,14 +13,16 @@ bfs::SbusData data;
 
 void setup() {
   /* Serial to display data */
-  Serial.begin(115200);
-  while (!Serial) {}
+  Serial.begin(100000);
+  pinMode(sbusPin, INPUT);
   /* Begin the SBUS communication */
   sbus_rx.Begin();
   sbus_tx.Begin();
 }
 
 void loop () {
+  int sbusInput = digitalRead(sbusPin);
+  Serial.print(sbusInput);
   if (sbus_rx.Read()) {
     /* Grab the received data */
     data = sbus_rx.data();
