@@ -1,45 +1,37 @@
-#include <sbus.h>
+#include "sbus.h"
 
-// Create an SBUS object
-bfs::SbusRx sbus(&Serial1, false);
-
-// Array to hold the channel data
-uint16_t channels[16];
-bool failSafe;
-bool lostFrame;
+/* SBUS object, reading SBUS */
+bfs::SbusRx sbus_rx(&Serial); // if Arduino is Uno: sbus_rx(&Serial)
+/* SBUS object, writing SBUS */
+bfs::SbusTx sbus_tx(&Serial); // if Arduino is Uno: sbus_tx(&Serial)
+/* SBUS data */
+bfs::SbusData data;
 
 void setup() {
-  // Start serial communication for debugging
+  /* Serial to display data */
   Serial.begin(115200);
-  Serial.println("Initializing SBUS...");
-
-  // Initialize SBUS at 100000 baud
-  sbus.begin();
-  Serial.println("SBUS initialized. Waiting for data...");
+  while (!Serial) {}
+  /* Begin the SBUS communication */
+  sbus_rx.Begin();
+  sbus_tx.Begin();
 }
 
-void loop() {
-  // Read the SBUS data
-  if (sbus.read(&channels[0], &failSafe, &lostFrame)) {
-    // Print the channel values
-    for (int i = 0; i < 16; i++) {
-      Serial.print("Channel ");
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.println(channels[i]);
+void loop () {
+  if (sbus_rx.Read()) {
+    /* Grab the received data */
+    data = sbus_rx.data();
+    /* Display the received data */
+    for (int8_t i = 0; i < data.NUM_CH; i++) {
+      Serial.print(data.ch[i]);
+      Serial.print("\t");
     }
-
-    // Print lost frame and failsafe status
-    Serial.print("Lost Frame: ");
-    Serial.print(lostFrame);
+    /* Display lost frames and failsafe data */
+    Serial.print(data.lost_frame);
     Serial.print("\t");
-    Serial.print("Failsafe: ");
-    Serial.println(failSafe);
-    Serial.println();
-  } else {
-    Serial.println("No SBUS data received.");
+    Serial.println(data.failsafe);
+    /* Set the SBUS TX data to the received data */
+    sbus_tx.data(data);
+    /* Write the data to the servos */
+    sbus_tx.Write();
   }
-
-  // Add a small delay
-  delay(10);
 }
