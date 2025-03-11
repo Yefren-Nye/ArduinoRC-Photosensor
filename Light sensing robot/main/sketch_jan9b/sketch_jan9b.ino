@@ -41,6 +41,18 @@ int quarterSpeed = 63;
 
 bool manualControl = false;
 
+// Values here
+
+  int forwardLeftValue;
+  int forwardRightValue;
+  int aftLeftValue;
+  int aftRightValue;
+
+int *flPointer = &forwardLeftValue;
+int *frPointer = &forwardRightValue;
+int *alPointer = &aftLeftValue;
+int *arPointer = &aftRightValue;
+
 void setup() {
     Serial.begin(9600);
     pinMode(forwardLeft, INPUT);
@@ -62,11 +74,6 @@ void loop() {
   if (manualControl == false) {
   //Find the quadrant to steer towards
   isQuadrant();
-
-  int forwardLeftValue = analogRead(forwardLeft);
-  int forwardRightValue = analogRead(forwardRight);
-  int aftLeftValue = analogRead(aftLeft);
-  int aftRightValue = analogRead(aftRight);
 
   if (FRONT == true) {steerForward();}
   else if (AFT == true) {steerAft();}
@@ -106,8 +113,8 @@ void sensorCalibration() {
     //Calibration sequence
 
     //Forward values
-    int forwardLeftValue = analogRead(forwardLeft);
-    int forwardRightValue = analogRead(forwardRight);
+    (*flPointer)=analogRead(forwardLeft);
+    (*frPointer) = analogRead(forwardRight);
 
     if (forwardLeftValue < flMin) flMin = forwardLeftValue;
     if (forwardLeftValue > flMax) flMax = forwardLeftValue;
@@ -124,8 +131,8 @@ void sensorCalibration() {
     Serial.print(frMax);
 
     //Aft values
-    int aftLeftValue = analogRead(aftLeft);
-    int aftRightValue = analogRead(aftRight);
+    (*alPointer) = analogRead(aftLeft);
+    (*arPointer) = analogRead(aftRight);
 
     if (aftLeftValue < alMin) alMin = aftLeftValue;
     if (aftLeftValue > alMax) alMax = aftLeftValue;
@@ -158,15 +165,15 @@ void isQuadrant() {
   RIGHT = false;
   AFT = false;
 
-  int fl = analogRead(forwardLeft);
-  int fr = analogRead(forwardRight);
-  int al = analogRead(aftLeft);
-  int ar = analogRead(aftRight);
-
-  int f = fl+fr;
-  int l = fl+al;
-  int r = fr+ar;
-  int a = al+ar;
+  (*flPointer)=analogRead(forwardLeft);
+  (*frPointer)=analogRead(forwardRight);
+  (*alPointer)=analogRead(aftLeft);
+  (*arPointer)=analogRead(aftRight);
+  
+  int f =(*flPointer)+(*frPointer);
+  int l=(*flPointer)+(*alPointer);
+  int r=(*frPointer)+(*arPointer);
+  int a=(*alPointer)+(*arPointer);
 
   if(f > l && f > r && f > a) {
     FRONT = true;
@@ -184,8 +191,8 @@ void isQuadrant() {
 }
 
 void steerForward() {
-  int forwardLeftValue = analogRead(forwardLeft);
-  int forwardRightValue = analogRead(forwardRight);
+  (*flPointer) = analogRead(forwardLeft);
+  (*frPointer) = analogRead(forwardRight);
 
   int L = map(forwardLeftValue, 0, 1023, 0, 255);
   int R = map(forwardRightValue, 0, 1023, 0, 255);
@@ -206,8 +213,8 @@ void steerForward() {
 }
 
 void steerAft() {
-  int aftLeftValue = analogRead(aftLeft);
-  int aftRightValue = analogRead(aftRight);
+  (*alPointer) = analogRead(aftLeft);
+  (*arPointer) = analogRead(aftRight);
 
   int L = map(aftLeftValue, 0, 1023, 0, 255);
   int R = map(aftRightValue, 0, 1023, 0, 255);
@@ -228,8 +235,8 @@ void steerAft() {
 }
 
 void steerLeft() {
-  int forwardLeftValue = analogRead(forwardLeft);
-  int aftLeftValue = analogRead(aftLeft);
+  (*flPointer) = analogRead(forwardLeft);
+  (*alPointer) = analogRead(aftLeft);
 
   if (forwardLeftValue > aftLeftValue) {
 
@@ -263,8 +270,8 @@ void steerLeft() {
 }
 
 void steerRight() {
-  int forwardRightValue = analogRead(forwardRight);
-  int aftRightValue = analogRead(aftRight);
+  (*frPointer) = analogRead(forwardRight);
+  (*arPointer) = analogRead(aftRight);
 
   if (forwardRightValue > aftRightValue) {
 
