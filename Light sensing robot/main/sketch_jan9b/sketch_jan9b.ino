@@ -37,6 +37,10 @@ int fullSpeed = 255;
 int halfSpeed = 127;
 int quarterSpeed = 63;
 
+// Boolean for manual control
+
+bool manualControl = false;
+
 void setup() {
     Serial.begin(9600);
     pinMode(forwardLeft, INPUT);
@@ -55,6 +59,7 @@ void setup() {
 
 void loop() {
 
+  if (manualControl == false) {
   //Find the quadrant to steer towards
   isQuadrant();
 
@@ -71,6 +76,7 @@ void loop() {
 
   compileReport(forwardLeftValue, forwardRightValue);
   delay(100);
+  } else {manualSteering();}
 }
 
 void compileReport(int forwardLeft, int forwardRight) {
@@ -293,3 +299,5 @@ void steerRight() {
   Serial.print(quarterSpeed);
   }
 }
+
+void manualSteering() {}
