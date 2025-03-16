@@ -234,6 +234,33 @@ void steerAft() {
   Serial.print(L/2);
 }
 
+void steerForwardAft (int l, int r, bool forward) {
+  int L = map(l, 0, 1023, 0, 255);
+  int R = map(r, 0, 1023, 0, 255);
+  
+  //Left motor with feedback
+
+  analogWrite(lMotor, R/2);
+  Serial.println("Left speed ");
+  Serial.print(R/2);
+
+  //Right motor with feedback
+  analogWrite(rMotor, L/2);
+  Serial.println("Right speed ");
+  Serial.print(L/2);
+
+  if (forward == true) {
+  digitalWrite(3, HIGH);
+  digitalWrite(4, LOW);
+  digitalWrite(5, HIGH);
+  digitalWrite(6, LOW);} else {
+  digitalWrite(3, LOW);
+  digitalWrite(4, HIGH);
+  digitalWrite(5, LOW);
+  digitalWrite(6, HIGH);}
+}
+
+
 void steerLeft() {
   (*flPointer) = analogRead(forwardLeft);
   (*alPointer) = analogRead(aftLeft);
