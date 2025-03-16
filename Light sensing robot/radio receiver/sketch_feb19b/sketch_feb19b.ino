@@ -1,5 +1,4 @@
-#include <sbus.h>
-#include <SoftwareSerial.h>
+#include "sbus.h"
 
 /* SBUS object, reading SBUS */
 bfs::SbusRx sbus_rx(&Serial); // if Arduino is Uno: sbus_rx(&Serial)
@@ -7,13 +6,17 @@ bfs::SbusRx sbus_rx(&Serial); // if Arduino is Uno: sbus_rx(&Serial)
 bfs::SbusTx sbus_tx(&Serial); // if Arduino is Uno: sbus_tx(&Serial)
 /* SBUS data */
 bfs::SbusData data;
-SoftwareSerial sbusSerial(10, 11); // RX, TX
 
 void setup() {
-  
+  // Set custom baud rate for hardware UART
+  uint16_t ubrr_value = 103; // UBRR value for 100,000 baud at 16 MHz clock
+  UBRR0H = (ubrr_value >> 8); // Set high byte of UBRR
+  UBRR0L = ubrr_value;        // Set low byte of UBRR
+  UCSR0A &= ~(1 << U2X0);     // Disable double-speed mode
+  UCSR0B = (1 << RXEN0);      // Enable receiver
+  UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // Set frame format: 8 data bits, 1 stop bit, no parity
   /* Serial to display data */
   Serial.begin(115200);
-  sbusSerial.begin(100000); // SBUS baud rate
   Serial.println("SBUS Debugging Started!");
   while (!Serial) {}
   /* Begin the SBUS communication */
@@ -38,11 +41,5 @@ void loop () {
     sbus_tx.data(data);
     /* Write the data to the servos */
     sbus_tx.Write();
-  }
-
-  if (sbusSerial.available()) {
-    uint8_t sbusData = sbusSerial.read();
-    Serial.print("SBUS Data: ");
-    Serial.println(sbusData, HEX); // Print in hexadecimal format
   }
 }
